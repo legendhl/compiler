@@ -70,7 +70,7 @@ const JSON = {
                 return parseArray();
             } else if (str[pos] === '"') {
                 return parseString();
-            } else if (/\d/.test(str[pos])) {
+            } else if (/[\d-]/.test(str[pos])) {
                 return parseNumber();
             } else if (str[pos] === 't') {
                 return parseTrue();
@@ -101,13 +101,56 @@ const JSON = {
             return s;
         }
         function parseNumber() {
-            let n = 0;
+            let num = 0;
+            let negative = false;
             let cur = str[pos];
-            while (/\d/.test(cur)) {
-                n = n * 10 + Number(cur);
+            if (cur === '-') {
+                negative = true;
                 cur = str[++pos];
             }
-            return n;
+            while (/\d/.test(cur)) {
+                num = num * 10 + Number(cur);
+                cur = str[++pos];
+            }
+            if (cur === '.') {
+                let exp = 0.1;
+                cur = str[++pos];
+                while (/\d/.test(cur)) {
+                    num = num + Number(cur) * exp;
+                    exp /= 10;
+                    cur = str[++pos];
+                }
+            }
+            if (cur === 'e' || cur === 'E') {
+                let expNeg = true;
+                cur = str[++pos];
+                if (cur === '-') {
+                    expNeg = false;
+                    cur = str[++pos];
+                } else if (cur === '+') {
+                    cur = str[++pos];
+                }
+                let expNum = 0;
+                if (/\d/.test(cur)) {
+                    while (/\d/.test(cur)) {
+                        expNum = expNum * 10 + Number(cur);
+                        cur = str[++pos];
+                    }
+                    while (expNum--) {
+                        if (expNeg) {
+                            num *= 10;
+                        } else {
+                            num /= 10;
+                        }
+                    }
+                } else {
+                    unexpectedEnd();
+                }
+            }
+            if (negative) {
+                num = -num;
+            }
+            return num;
         }
         function parseTrue() {
             next('t');
@@ -155,7 +198,7 @@ const JSON = {
     }
 }
 
-const input = ` { "num" : 1 ,  \t"arr": [ 1 , 2 , 3 ] ,\n"obj":{"foo":"innerObject"},"isJson":true,"nothing":null,"str":"hello"}`;
+const input = ` { "num" : 128.85 ,  \t"arr": [ 1 , 2 , 3 ] ,\n"obj":{"foo":"innerObject"},"isJson":true,"nothing":null,"str":"hello"}`;
 console.log(JSON.parse(input));
 const json = {};
 console.log(JSON.stringify(json));
