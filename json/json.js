@@ -13,7 +13,12 @@ const JSON = {
             unexpectedEnd();
         }
         let pos = 0;
-        return parseValue();
+        const json = parseValue();
+        skipWhiteSpace();
+        if (pos < len) {
+            unexpectedToken(str[pos], pos);
+        }
+        return json;
 
         function parseObject() {
             let obj = {};
