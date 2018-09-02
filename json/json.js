@@ -10,7 +10,7 @@ const JSON = {
         str += '';
         const len = str.length;
         if (!len) {
-            throw new SyntaxError('Unexpected end of JSON input')
+            unexpectedEnd();
         }
         let pos = 0;
         return parseValue();
@@ -19,20 +19,23 @@ const JSON = {
             let obj = {};
             pos++; // skip {
             while (true) {
+                skipWhiteSpace();
                 let key = parseString();
+                skipWhiteSpace();
                 if (str[pos] !== ':') {
-                    throw new SyntaxError(`Unexpected token ${str[pos]} in JSON at position ${pos}`);
+                    unexpectedToken(str[pos], pos);
                 }
                 pos++; // skip :
                 let value = parseValue();
                 obj[key] = value;
+                skipWhiteSpace();
                 let ch = str[pos++];
                 if (ch === '}') {
                     break;
                 } else if (ch === ',') {
                     continue;
                 } else {
-                    throw new SyntaxError(`Unexpected token ${ch} in JSON at position ${pos}`);
+                    unexpectedToken(ch, pos);
                 }
             }
             return obj;
@@ -43,13 +46,14 @@ const JSON = {
             while (true) {
                 let value = parseValue();
                 arr.push(value);
+                skipWhiteSpace();
                 let ch = str[pos++];
                 if (ch === ']') {
                     break;
                 } else if (ch === ',') {
                     continue;
                 } else {
-                    throw new SyntaxError(`Unexpected token ${ch} in JSON at position ${pos}`);
+                    unexpectedToken(ch, pos);
                 }
             }
             return arr;
@@ -69,19 +73,22 @@ const JSON = {
                 return parseFalse();
             } else if (str[pos] === 'n') {
                 return parseNull();
+            } else if (/\s/.test(str[pos])) {
+                pos++;
+                return parseValue();
             } else {
-
+                unexpectedToken(str[pos], pos);
             }
         }
         function parseString() {
             let s = '';
             if (str[pos] !== '"') {
-                throw new SyntaxError(`Unexpected token ${str[pos]} in JSON at position ${pos}`);
+                unexpectedToken(str[pos], pos);
             }
             pos++; // skip "
             while (str[pos] !== '"') {
                 if (pos > len) {
-                    throw new SyntaxError('Unexpected end of JSON input');
+                    unexpectedEnd();
                 }
                 s += str[pos++];
             }
@@ -122,8 +129,19 @@ const JSON = {
         function next(expected) {
             let cur = str[pos++];
             if (cur !== expected) {
-                throw new SyntaxError(`Unexpected token ${cur} in JSON at position ${pos}`);
+                unexpectedToken(cur, pos);
             }
+        }
+        function skipWhiteSpace() {
+            while (/\s/.test(str[pos])) {
+                pos++;
+            }
+        }
+        function unexpectedEnd() {
+            throw new SyntaxError('Unexpected end of JSON input');
+        }
+        function unexpectedToken(token, pos) {
+            throw new SyntaxError(`Unexpected token ${token} in JSON at position ${pos}`);
         }
     },
 
@@ -132,7 +150,7 @@ const JSON = {
     }
 }
 
-const input = `{"num":1,"arr":[1,2,3],"obj":{"foo":"innerObject"},"isJson":true,"nothing":null,"str":"hello"}`;
+const input = ` { "num" : 1 ,  \t"arr": [ 1 , 2 , 3 ] ,\n"obj":{"foo":"innerObject"},"isJson":true,"nothing":null,"str":"hello"}`;
 console.log(JSON.parse(input));
 const json = {};
 console.log(JSON.stringify(json));
