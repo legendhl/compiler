@@ -194,11 +194,43 @@ const JSON = {
     },
 
     stringify(json) {
-        return json;
+        return stringifyJson(json);
+
+        function stringifyJson(json) {
+            if (typeof json === 'string') {
+                return `"${json}"`;
+            } else if (typeof json === 'number') {
+                return json.toString();
+            } else if (typeof json === 'boolean') {
+                return json.toString();
+            } else if (json === null) {
+                return 'null';
+            } else if (Array.isArray(json)) {
+                return stringifyArray(json);
+            } else if (typeof json === 'object') {
+                return stringifyObject(json);
+            } else if (typeof json === 'undefined') {
+                return undefined;
+            }
+        }
+        function stringifyArray(arr) {
+            let vArr = arr.filter(item => typeof item !== 'undefined')
+                            .map(item => stringifyJson(item));
+            return `[${vArr.join(',')}]`;
+        }
+        function stringifyObject(obj) {
+            let arr = [];
+            for (let [key, value] of Object.entries(obj)) {
+                if (typeof value !== 'undefined') {
+                    arr.push(`"${key}"` + ':' + stringifyJson(value));
+                }
+            }
+            return `{${arr.join(',')}}`
+        }    
     }
 }
 
 const input = ` { "num" : 128.85 ,  \t"arr": [ 1 , 2 , 3 ] ,\n"obj":{"foo":"innerObject"},"isJson":true,"nothing":null,"str":"hello"}`;
 console.log(JSON.parse(input));
-const json = {};
+const json = { num: 128.8, arr: [ 1, 2, 3 ], obj: { foo: 'innerObject' }, isJson: true, nothing: null, str: 'hello' };
 console.log(JSON.stringify(json));
