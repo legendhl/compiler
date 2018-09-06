@@ -27,6 +27,52 @@ function InputStream(input) {
     }
 }
 
+function Tokenizer(input) {
+    let stream = InputStream(input);
+    return {
+        peek,
+        next,
+        eof,
+        croak
+    }
+    function isWhiteSpace(ch) {
+        return /\s/.test(ch);
+    }
+    function readNext() {
+        readWhile(isWhiteSpace);
+        if (stream.peek() === '<') {
+            return readTagName();
+        } else {
+            return readTagValue();
+        }
+    }
+    function readWhile(predicate) {
+        let str = '';
+        while (!stream.eof() && predicate(stream.peek())) {
+            str += stream.next();
+        }
+        return str;
+    }
+    function readTagName() {
+
+    }
+    function readTagValue() {
+        
+    }
+    function peek() {
+
+    }
+    function next() {
+        
+    }
+    function eof() {
+        return peek() === null;
+    }
+    function croak() {
+        
+    }
+}
+
 const xml = `
 <root>
     <note type="dairy">
@@ -39,7 +85,7 @@ const xml = `
 </root>
 `;
 
-let stream = InputStream(xml);
-while (!stream.eof()) {
-    console.log(stream.next());
+let tokenizer = Tokenizer(xml);
+while (!tokenizer.eof()) {
+    console.log(tokenizer.next());
 }
