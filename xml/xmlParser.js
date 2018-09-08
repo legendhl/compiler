@@ -29,7 +29,6 @@ function InputStream(input) {
 
 function Tokenizer(input) {
     let stream = InputStream(input);
-    let stack = [];
     let cur = null;
     let curTag = null;
     return {
@@ -78,7 +77,7 @@ function Tokenizer(input) {
         expectChar('"');
         let value = readWhile(ch => /[^"]/.test(ch));
         expectChar('"');
-        return { type: 'tagAttr', value: { [key]: value } };
+        return { type: 'tagAttr', value: { key, value } };
     }
     function expectChar(ch) {
         if (ch !== stream.next()) {
@@ -92,7 +91,7 @@ function Tokenizer(input) {
         if (!value) {
             return null;
         }
-        return { type: 'tagValue', value: value };
+        return { type: 'tagValue', content: value };
     }
     function readTagStart() {
         expectChar('<');
@@ -122,6 +121,43 @@ function Tokenizer(input) {
     }
 }
 
+function xml2Json(xml) {
+    let tokenizer = Tokenizer(xml);
+    let root = { children: [] };
+    let nodes = [];
+    let cur = null;
+    while (!tokenizer.eof()) {
+        let token = tokenizer.next();
+        if (token.type === 'tagNameStart') {
+            let node = { tag: token.value };
+            nodes.push(node);
+        } else if (token.type === 'tagAttr') {
+            cur = nodes[nodes.length - 1];
+            if (cur.attrs) {
+                cur.attrs.push(token.value);
+            } else {
+                cur.attrs = [token.value];
+            }
+        } else if (token.type === 'tagValue') {
+            cur = nodes[nodes.length - 1];
+            cur.val = token.value;
+        } else if (token.type === 'tagNameEnd') {
+            let node = nodes.pop();
+            if (nodes.length) {
+                cur = nodes[nodes.length - 1];
+                if (cur.children) {
+                    cur.children.push(node);
+                } else {
+                    cur.children = [node];
+                }
+            } else {
+                root.children.push(node);
+            }
+        }
+    }
+    return root;
+}
+
 const xml = `
 <root>
     <note type="dairy">
@@ -134,7 +170,4 @@ const xml = `
 </root>
 `;
 
-let tokenizer = Tokenizer(xml);
-while (!tokenizer.eof()) {
-    console.log(tokenizer.next());
-}
+console.log(xml2Json(xml));
