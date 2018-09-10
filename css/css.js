@@ -9,6 +9,7 @@ function Tokenizer(input) {
     let stream = InputStream(input);
     let cur = null;
     let curSelector = null;
+    let lastType = null;
     return {
         peek,
         next,
@@ -24,6 +25,21 @@ function Tokenizer(input) {
     function readNext() {
         readWhile(isWhiteSpace);
         let ch = stream.peek();
+        if (ch === '{') {
+            stream.next();
+            return readNext();
+        } else if (ch === '}') {
+            stream.next();
+            curSelector = null;
+            return readNext();
+        } else if (ch === ':') {
+            stream.next();
+            return readValue();
+        } else if (curSelector) {
+            return readProperty();
+        } else {
+            return readSelector();
+        }
     }
     function readWhile(predicate) {
         let str = '';
@@ -39,10 +55,13 @@ function Tokenizer(input) {
         return ch;
     }
     function readSelector() {
+        readWhile(isWhiteSpace);
     }
     function readProperty() {
+        readWhile(isWhiteSpace);
     }
     function readValue() {
+        readWhile(isWhiteSpace);
     }
     function peek() {
         return cur || (cur = readNext());
