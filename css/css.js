@@ -9,7 +9,6 @@ function Tokenizer(input) {
     let stream = InputStream(input);
     let cur = null;
     let curSelector = null;
-    let lastType = null;
     return {
         peek,
         next,
@@ -25,15 +24,17 @@ function Tokenizer(input) {
     function readNext() {
         readWhile(isWhiteSpace);
         let ch = stream.peek();
-        if (ch === '{') {
-            stream.next();
+        if (ch === '') {
+            return null;
+        } else if (ch === '{') {
+            skipChar();
             return readNext();
         } else if (ch === '}') {
-            stream.next();
+            skipChar();
             curSelector = null;
             return readNext();
         } else if (ch === ':') {
-            stream.next();
+            skipChar();
             return readValue();
         } else if (curSelector) {
             return readProperty();
@@ -56,12 +57,24 @@ function Tokenizer(input) {
     }
     function readSelector() {
         readWhile(isWhiteSpace);
+        let selector = readWhile(ch => /[^{}]/.test(ch)).trim();
+        curSelector = selector;
+        return { type: 'Selector', val: selector };
     }
     function readProperty() {
         readWhile(isWhiteSpace);
+        let property = readWhile(ch => /[a-zA-Z-]/.test(ch)).trim();
+        readWhile(isWhiteSpace);
+        return { type: 'Property', val: property };
     }
     function readValue() {
         readWhile(isWhiteSpace);
+        let value = readWhile(ch => /[^\n;]/.test(ch)).trim();
+        skipChar();
+        return { type: 'Value', val: value };
+    }
+    function skipChar() {
+        stream.next();
     }
     function peek() {
         return cur || (cur = readNext());
@@ -80,12 +93,18 @@ function Tokenizer(input) {
 }
 
 const style = `
+* {
+    box-sizing: border-box;
+}
 body {
     color: #000;
     background: #fff;
-    margin: 0 10px;
     padding: 0;
     font-family: PingFangSC-Regular, Verdana, Arial;
+}
+.filter-item {
+    padding: 4px 10px;
+    margin: 0 0 2px;
 }
 `;
 
