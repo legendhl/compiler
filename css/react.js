@@ -1,5 +1,5 @@
 /**
- * style: {declaration1, declaration2, ... declarationN }
+ * className: {declaration1, declaration2, ... declarationN }
  * declaration  property: value[,]
  */
 
@@ -51,16 +51,16 @@ function Tokenizer(input) {
             if (styleStarted) {
                 return readDeclaration();
             } else {
-                return readStyle();
+                return readClassName();
             }
         }
     }
-    function readStyle() {
+    function readClassName() {
         readWhile(isWhiteSpace);
-        let style = readWhile(ch => /[a-zA-Z_]/.test(ch));
+        let className = readWhile(ch => /[a-zA-Z_]/.test(ch));
         readWhile(isWhiteSpace);
         expectChar(':');
-        return { type: 'Style', val: style };
+        return { type: 'ClassName', val: className };
     }
     function readDeclaration() {
         readWhile(isWhiteSpace);
