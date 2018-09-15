@@ -18,9 +18,6 @@ function Tokenizer(input) {
     function isWhiteSpace(ch) {
         return /\s/.test(ch);
     }
-    function isChar(ch) {
-        return /[a-zA-Z-]/.test(ch);
-    }
     function readNext() {
         readWhile(isWhiteSpace);
         let ch = stream.peek();
@@ -33,11 +30,8 @@ function Tokenizer(input) {
             skipChar();
             curSelector = null;
             return readNext();
-        } else if (ch === ':') {
-            skipChar();
-            return readValue();
         } else if (curSelector) {
-            return readProperty();
+            return readDeclaration();
         } else {
             return readSelector();
         }
@@ -61,18 +55,34 @@ function Tokenizer(input) {
         curSelector = selector;
         return { type: 'Selector', val: selector };
     }
-    function readProperty() {
+    function readDeclaration() {
         readWhile(isWhiteSpace);
         let property = readWhile(ch => /[a-zA-Z-]/.test(ch)).trim();
+        if (!property) {
+            croak();
+        }
         readWhile(isWhiteSpace);
-        return { type: 'Property', val: property };
-    }
-    function readValue() {
-        readWhile(isWhiteSpace);
+        expectChar(':');
+        readWhile(ch => /\s/.test(ch) && ch !== '\n');
         let value = readWhile(ch => /[^\n;]/.test(ch)).trim();
+        if (!value) {
+            croak();
+        }
         skipChar();
-        return { type: 'Value', val: value };
+        return { type: 'Declaration', val: { property, value } };
     }
+    // function readProperty() {
+    //     readWhile(isWhiteSpace);
+    //     let property = readWhile(ch => /[a-zA-Z-]/.test(ch)).trim();
+    //     readWhile(isWhiteSpace);
+    //     return { type: 'Property', val: property };
+    // }
+    // function readValue() {
+    //     readWhile(isWhiteSpace);
+    //     let value = readWhile(ch => /[^\n;]/.test(ch)).trim();
+    //     skipChar();
+    //     return { type: 'Value', val: value };
+    // }
     function skipChar() {
         stream.next();
     }
