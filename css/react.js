@@ -8,7 +8,7 @@ const InputStream = require('../components/InputStream');
 function Tokenizer(input) {
     let stream = InputStream(input);
     let cur = null;
-    let curSelector = null;
+    let styleStarted = false;
     return {
         peek,
         next,
@@ -33,6 +33,26 @@ function Tokenizer(input) {
     }
     function readNext() {
         readWhile(isWhiteSpace);
+        let ch = stream.peek();
+        if (ch === '') {
+            return null;
+        } else if (ch === '{') {
+            styleStarted = true;
+            return readProperty();
+        } else if (ch === '}') {
+            styleStarted = false;
+            return readStyle();
+        } else if (ch === ':') {
+            return readValue();
+        } else if (ch === ',') {
+            if (styleStarted) {
+                return readProperty();
+            } else {
+                return readStyle();
+            }
+        } else {
+            return readStyle();
+        }
     }
     function readStyle() {
         readWhile(isWhiteSpace);
