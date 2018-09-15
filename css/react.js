@@ -36,32 +36,51 @@ function Tokenizer(input) {
         let ch = stream.peek();
         if (ch === '') {
             return null;
+        } else if (ch === ',') {
+            skipChar();
+            return readNext();
         } else if (ch === '{') {
             styleStarted = true;
-            return readProperty();
+            skipChar();
+            return readDeclaration();
         } else if (ch === '}') {
             styleStarted = false;
-            return readStyle();
-        } else if (ch === ':') {
-            return readValue();
-        } else if (ch === ',') {
+            skipChar();
+            return readNext();
+        } else {
             if (styleStarted) {
-                return readProperty();
+                return readDeclaration();
             } else {
                 return readStyle();
             }
-        } else {
-            return readStyle();
         }
     }
     function readStyle() {
         readWhile(isWhiteSpace);
-    }
-    function readProperty() {
+        let style = readWhile(ch => /[a-zA-Z_]/.test(ch));
         readWhile(isWhiteSpace);
+        expectChar(':');
+        return { type: 'Style', val: style };
     }
-    function readValue() {
+    function readDeclaration() {
         readWhile(isWhiteSpace);
+        let property = readWhile(ch => /[a-zA-Z]/.test(ch));
+        if (!property) {
+            croak();
+        }
+        readWhile(isWhiteSpace);
+        expectChar(':');
+        readWhile(ch => /[\s]/.test(ch));
+        let value = readWhile(ch => /[^\s,]/.test(ch));
+        if (!value) {
+            croak();
+        }
+        readWhile(ch => /\s/.test(ch) && ch !== '\n');
+        let ch = stream.peek();
+        if (ch !== ',' && ch !== '\n') {
+            croak();
+        }
+        return { type: 'Declaration', val: { property, value } };
     }
     function skipChar() {
         stream.next();
