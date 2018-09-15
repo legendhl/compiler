@@ -101,56 +101,41 @@ const JSON = {
             return s;
         }
         function parseNumber() {
-            let num = 0;
-            let negative = false;
+            let numberStr = '';
             let cur = str[pos];
             if (cur === '-') {
-                negative = true;
+                numberStr += cur;
                 cur = str[++pos];
             }
             while (/\d/.test(cur)) {
-                num = num * 10 + Number(cur);
+                numberStr += cur;
                 cur = str[++pos];
             }
             if (cur === '.') {
-                let exp = 0.1;
+                numberStr += cur;
                 cur = str[++pos];
                 while (/\d/.test(cur)) {
-                    num = num + Number(cur) * exp;
-                    exp /= 10;
+                    numberStr += cur;
                     cur = str[++pos];
                 }
             }
             if (cur === 'e' || cur === 'E') {
-                let expNeg = true;
+                numberStr += cur;
                 cur = str[++pos];
-                if (cur === '-') {
-                    expNeg = false;
-                    cur = str[++pos];
-                } else if (cur === '+') {
+                if (cur === '-' || cur === '+') {
+                    numberStr += cur;
                     cur = str[++pos];
                 }
-                let expNum = 0;
                 if (/\d/.test(cur)) {
                     while (/\d/.test(cur)) {
-                        expNum = expNum * 10 + Number(cur);
+                        numberStr += cur;
                         cur = str[++pos];
-                    }
-                    while (expNum--) {
-                        if (expNeg) {
-                            num *= 10;
-                        } else {
-                            num /= 10;
-                        }
                     }
                 } else {
                     unexpectedEnd();
                 }
             }
-            if (negative) {
-                num = -num;
-            }
-            return num;
+            return parseFloat(numberStr);
         }
         function parseTrue() {
             next('t');
@@ -215,7 +200,7 @@ const JSON = {
         }
         function stringifyArray(arr) {
             let vArr = arr.filter(item => typeof item !== 'undefined')
-                            .map(item => stringifyJson(item));
+                .map(item => stringifyJson(item));
             return `[${vArr.join(',')}]`;
         }
         function stringifyObject(obj) {
@@ -226,11 +211,11 @@ const JSON = {
                 }
             }
             return `{${arr.join(',')}}`
-        }    
+        }
     }
 }
 
-const input = ` { "num" : 128.85 ,  \t"arr": [ 1 , 2 , 3 ] ,\n"obj":{"foo":"innerObject"},"isJson":true,"nothing":null,"str":"hello"}`;
+const input = ` { "num" : 128.85e+2 ,  \t"arr": [ 1 , 2 , 3 ] ,\n"obj":{"foo":"innerObject"},"isJson":true,"nothing":null,"str":"hello"}`;
 console.log(JSON.parse(input));
-const json = { num: 128.8, arr: [ 1, 2, 3 ], obj: { foo: 'innerObject' }, isJson: true, nothing: null, str: 'hello' };
+const json = { num: 128.85, arr: [1, 2, 3], obj: { foo: 'innerObject' }, isJson: true, nothing: null, str: 'hello' };
 console.log(JSON.stringify(json));
