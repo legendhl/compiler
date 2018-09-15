@@ -20,17 +20,34 @@ const JSON = {
         }
         return json;
 
+        function parseValue() {
+            skipWhiteSpace();
+            if (str[pos] === '{') {
+                return parseObject();
+            } else if (str[pos] === '[') {
+                return parseArray();
+            } else if (str[pos] === '"') {
+                return parseString();
+            } else if (/[\d-]/.test(str[pos])) {
+                return parseNumber();
+            } else if (str[pos] === 't') {
+                return parseTrue();
+            } else if (str[pos] === 'f') {
+                return parseFalse();
+            } else if (str[pos] === 'n') {
+                return parseNull();
+            } else {
+                unexpectedToken(str[pos], pos);
+            }
+        }
         function parseObject() {
             let obj = {};
-            pos++; // skip {
+            next('{');
             while (true) {
                 skipWhiteSpace();
                 let key = parseString();
                 skipWhiteSpace();
-                if (str[pos] !== ':') {
-                    unexpectedToken(str[pos], pos);
-                }
-                pos++; // skip :
+                next(':');
                 let value = parseValue();
                 obj[key] = value;
                 skipWhiteSpace();
@@ -47,7 +64,7 @@ const JSON = {
         }
         function parseArray() {
             let arr = [];
-            pos++; // skip [
+            next('[');
             while (true) {
                 let value = parseValue();
                 arr.push(value);
@@ -63,41 +80,19 @@ const JSON = {
             }
             return arr;
         }
-        function parseValue() {
-            if (str[pos] === '{') {
-                return parseObject();
-            } else if (str[pos] === '[') {
-                return parseArray();
-            } else if (str[pos] === '"') {
-                return parseString();
-            } else if (/[\d-]/.test(str[pos])) {
-                return parseNumber();
-            } else if (str[pos] === 't') {
-                return parseTrue();
-            } else if (str[pos] === 'f') {
-                return parseFalse();
-            } else if (str[pos] === 'n') {
-                return parseNull();
-            } else if (/\s/.test(str[pos])) {
-                pos++;
-                return parseValue();
-            } else {
-                unexpectedToken(str[pos], pos);
-            }
-        }
         function parseString() {
             let s = '';
             if (str[pos] !== '"') {
                 unexpectedToken(str[pos], pos);
             }
-            pos++; // skip "
+            next('"');
             while (str[pos] !== '"') {
                 if (pos > len) {
                     unexpectedEnd();
                 }
                 s += str[pos++];
             }
-            pos++; // skip "
+            next('"');
             return s;
         }
         function parseNumber() {
@@ -162,7 +157,7 @@ const JSON = {
         function next(expected) {
             let cur = str[pos++];
             if (cur !== expected) {
-                unexpectedToken(cur, pos);
+                unexpectedToken(cur, pos - 1);
             }
         }
         function skipWhiteSpace() {
