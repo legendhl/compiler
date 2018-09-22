@@ -46,6 +46,10 @@ function Tokenizer(input) {
         } else if (ch === '}') {
             styleStarted = false;
             skipChar();
+            readWhile(isWhiteSpace);
+            if (!stream.eof()) {
+                expectChar(',');
+            }
             return readNext();
         } else {
             if (styleStarted) {
