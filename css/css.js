@@ -71,18 +71,6 @@ function Tokenizer(input) {
         skipChar();
         return { type: 'Declaration', val: { property, value } };
     }
-    // function readProperty() {
-    //     readWhile(isWhiteSpace);
-    //     let property = readWhile(ch => /[a-zA-Z-]/.test(ch)).trim();
-    //     readWhile(isWhiteSpace);
-    //     return { type: 'Property', val: property };
-    // }
-    // function readValue() {
-    //     readWhile(isWhiteSpace);
-    //     let value = readWhile(ch => /[^\n;]/.test(ch)).trim();
-    //     skipChar();
-    //     return { type: 'Value', val: value };
-    // }
     function skipChar() {
         stream.next();
     }
@@ -102,6 +90,21 @@ function Tokenizer(input) {
     }
 }
 
+function toAST(style) {
+    let tokenizer = Tokenizer(style);
+    let styles = [];
+    while (!tokenizer.eof()) {
+        let token = tokenizer.next();
+        if (token.type === 'Selector') {
+            token.declarations = [];
+            styles.push(token);
+        } else if (token.type === 'Declaration') {
+            styles[styles.length - 1].declarations.push(token);
+        }
+    }
+    return styles;
+}
+
 const style = `
 * {
     box-sizing: border-box;
@@ -118,7 +121,5 @@ body {
 }
 `;
 
-let tokenizer = Tokenizer(style);
-while (!tokenizer.eof()) {
-    console.log(tokenizer.next());
-}
+let ast = toAST(style);
+console.log(ast);
