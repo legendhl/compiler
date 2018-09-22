@@ -90,7 +90,7 @@ function Tokenizer(input) {
     }
 }
 
-function toAST(style) {
+function css2AST(style) {
     let tokenizer = Tokenizer(style);
     let styles = [];
     while (!tokenizer.eof()) {
@@ -105,6 +105,18 @@ function toAST(style) {
     return styles;
 }
 
+function ast2CSS(ast) {
+    const tab = ' '.repeat(4);
+    let css = ast.reduce((prev, cur) => {
+        let str = '';
+        str += `${cur.val} {\n`;
+        str += cur.declarations.map(item => `${tab}${item.val.property}: ${item.val.value};`).join('\n');
+        str += `${cur.declarations.length > 0 ? '\n' : ''}}\n`;
+        return prev + str;
+    }, '');
+    return css;
+}
+
 const style = `
 * {
     box-sizing: border-box;
@@ -116,10 +128,14 @@ body {
     font-family: PingFangSC-Regular, Verdana, Arial;
 }
 .filter-item {
-    padding: 4px 10px;
-    margin: 0 0 2px;
+    padding: 4px 10px;    margin: 0 0 2px;
 }
 `;
 
-let ast = toAST(style);
+let ast = css2AST(style);
 console.log(ast);
+console.log(ast2CSS(ast))
+// let tokenizer = Tokenizer(style);
+// while (!tokenizer.eof()) {
+//     console.log(tokenizer.next());
+// }
