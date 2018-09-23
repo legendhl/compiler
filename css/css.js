@@ -117,25 +117,9 @@ function ast2CSS(ast) {
     return css;
 }
 
-const style = `
-* {
-    box-sizing: border-box;
+const css = {
+    css2AST,
+    ast2CSS
 }
-body {
-    color: #000;
-    background: #fff;
-    padding: 0;
-    font-family: PingFangSC-Regular, Verdana, Arial;
-}
-.filter-item {
-    padding: 4px 10px;    margin: 0 0 2px;
-}
-`;
 
-let ast = css2AST(style);
-console.log(ast);
-console.log(ast2CSS(ast))
-// let tokenizer = Tokenizer(style);
-// while (!tokenizer.eof()) {
-//     console.log(tokenizer.next());
-// }
+module.exports = css;

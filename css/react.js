@@ -132,25 +132,9 @@ function ast2React(ast) {
     return style;
 }
 
-const style = `
-wrapper: {
-    flex: 1
-},
-header: {
-    zIndex: 3,
-    flexDirection: 'row',
-    flex: 1,
-},
-absolute: {
-    position: 'absolute',
-    top: 0, left: 0, right: 0,
-},
-`;
+const reactStyle = {
+    react2AST,
+    ast2React
+}
 
-// let tokenizer = Tokenizer(style);
-// while (!tokenizer.eof()) {
-//     console.log(tokenizer.next());
-// }
-let ast = react2AST(style);
-console.log(ast);
-console.log(ast2React(ast))
+module.exports = reactStyle;
