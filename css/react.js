@@ -126,7 +126,7 @@ function ast2React(ast) {
         let str = '';
         str += `${cur.val}: {\n`;
         str += cur.declarations.map(item => `${tab}${item.val.property}: ${item.val.value}`).join(',\n');
-        str += `${cur.declarations.length > 0 ? '\n' : ''}}\n`;
+        str += `${cur.declarations.length > 0 ? '\n' : ''}},\n`;
         return prev + str;
     }, '');
     return style;
