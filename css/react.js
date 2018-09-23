@@ -105,6 +105,33 @@ function Tokenizer(input) {
     }
 }
 
+function react2AST(style) {
+    let tokenizer = Tokenizer(style);
+    let styles = [];
+    while (!tokenizer.eof()) {
+        let token = tokenizer.next();
+        if (token.type === 'ClassName') {
+            token.declarations = [];
+            styles.push(token);
+        } else if (token.type === 'Declaration') {
+            styles[styles.length - 1].declarations.push(token);
+        }
+    }
+    return styles;
+}
+
+function ast2React(ast) {
+    const tab = ' '.repeat(4);
+    let style = ast.reduce((prev, cur) => {
+        let str = '';
+        str += `${cur.val}: {\n`;
+        str += cur.declarations.map(item => `${tab}${item.val.property}: ${item.val.value}`).join(',\n');
+        str += `${cur.declarations.length > 0 ? '\n' : ''}}\n`;
+        return prev + str;
+    }, '');
+    return style;
+}
+
 const style = `
 wrapper: {
     flex: 1
@@ -120,7 +147,10 @@ absolute: {
 },
 `;
 
-let tokenizer = Tokenizer(style);
-while (!tokenizer.eof()) {
-    console.log(tokenizer.next());
-}
+// let tokenizer = Tokenizer(style);
+// while (!tokenizer.eof()) {
+//     console.log(tokenizer.next());
+// }
+let ast = react2AST(style);
+console.log(ast);
+console.log(ast2React(ast))
