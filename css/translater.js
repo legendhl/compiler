@@ -10,6 +10,9 @@ function css2React(css) {
             item.declarations = item.declarations.map(declaration => {
                 declaration.val.property = declaration.val.property.replace(/-\w/g, match => match.slice(1).toUpperCase());
                 // TODO declaration.val.value
+                if (!/^\d*\.?\d+$/.test(declaration.val.value)) {
+                    declaration.val.value = `'${declaration.val.value}'`;
+                }
                 return declaration;
             })
         }
@@ -27,6 +30,9 @@ function react2Css(style) {
             item.declarations = item.declarations.map(declaration => {
                 declaration.val.property = declaration.val.property.replace(/[A-Z]/g, match => '-' + match.toLowerCase());
                 // TODO declaration.val.value
+                if (declaration.val.value.startsWith('\'') && declaration.val.value.endsWith('\'')) {
+                    declaration.val.value = declaration.val.value.substring(1, declaration.val.value.length - 1);
+                }
                 return declaration;
             })
         }
