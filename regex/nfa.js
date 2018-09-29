@@ -102,4 +102,48 @@ function re(regexp, str) {
     return match(state, str);
 }
 
+Array.prototype.peek = function() {
+    if (!this.length) {
+        return null;
+    } else {
+        return this[this.length - 1];
+    }
+}
+
+function in2post(str) {
+}
+
+function isOper(ch) {
+    return '()\\[]*+?{}^$|'.includes(ch);
+}
+
+function getPrecedence(oper) {
+    // 运算符优先级：
+    // \	转义符
+    // (), (?:), (?=), []	圆括号和方括号
+    // *, +, ?, {n}, {n,}, {n,m}	限定符
+    // ^, $, \任何元字符、任何字符	定位点和序列（即：位置和顺序）
+    // | “或”操作
+    switch (oper) {
+        case '\\':
+            return 5;
+        case '(':
+        case ')':
+        case '[':
+        case ']':
+            return 4;
+        case '*':
+        case '+':
+        case '?':
+            return 3;
+        case '^':
+        case '$':
+            return 2;
+        case '|':
+            return 1;
+        default:
+            return 0;
+    }
+}
+
 console.log(re('abb.+.a.', 'abba'));
