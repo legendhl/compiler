@@ -102,7 +102,7 @@ function re(regexp, str) {
     return match(state, str);
 }
 
-Array.prototype.peek = function() {
+Array.prototype.peek = function () {
     if (!this.length) {
         return null;
     } else {
@@ -111,10 +111,49 @@ Array.prototype.peek = function() {
 }
 
 function in2post(str) {
+    let operStack = [];
+    let stack = [];
+    for (let i = 0; i < str.length; i++) {
+        let s = str[i];
+        if (!isOper(s)) {
+            if (i > 0 && str[i - 1] !== '(' && str[i - 1] !== '|') {
+                pushOper('.', operStack, stack);
+            }
+            stack.push(s);
+        } else if (s === '(' || s === ')') {
+            if (s === '(') {
+                if (stack.length) {
+                    pushOper('.', operStack, stack);
+                }
+                operStack.push(s);
+            } else {
+                while (operStack.peek() !== '(') {
+                    stack.push(operStack.pop());
+                }
+                operStack.pop();
+            }
+        } else {
+            pushOper(s, operStack, stack);
+        }
+    }
+    function pushOper(oper, operStack, stack) {
+        if (!operStack.length || operStack.peek() === '(') {
+            operStack.push(oper);
+        } else if (getPrecedence(oper) > getPrecedence(operStack.peek())) {
+            operStack.push(oper);
+        } else {
+            stack.push(operStack.pop());
+            pushOper(oper, operStack, stack);
+        }
+    }
+    while (operStack.length) {
+        stack.push(operStack.pop());
+    }
+    return stack.join('');
 }
 
 function isOper(ch) {
-    return '()\\[]*+?{}^$|'.includes(ch);
+    return '()\\[]*+?{}^$|.'.includes(ch);
 }
 
 function getPrecedence(oper) {
@@ -138,6 +177,7 @@ function getPrecedence(oper) {
             return 3;
         case '^':
         case '$':
+        case '.':
             return 2;
         case '|':
             return 1;
