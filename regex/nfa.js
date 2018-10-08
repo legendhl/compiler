@@ -1,6 +1,14 @@
 const SPLIT = Symbol('split');
 const MATCH = Symbol('match');
 
+Array.prototype.peek = function () {
+    if (!this.length) {
+        return null;
+    } else {
+        return this[this.length - 1];
+    }
+}
+
 class State {
     constructor(c, next = null, next2 = null, endList = []) {
         this.c = c; // character
@@ -62,52 +70,6 @@ function post2nfa(str) {
     state = stack.pop();
     state.patch(matchState);
     return state;
-}
-
-function match(state, str) {
-    let curList = [];
-    let nextList = [];
-
-    addState(curList, state);
-    for (let c of str) {
-        step(curList, c, nextList);
-        [curList, nextList] = [nextList, curList];
-    }
-    return curList.some(state => state.c === MATCH);
-}
-
-function step(curList, c, nextList) {
-    nextList.splice(0, nextList.length);
-    curList.forEach(state => {
-        if (state.c === c) {
-            addState(nextList, state.next);
-        }
-    });
-}
-
-function addState(list, state) {
-    if (!state || list.includes(state)) {
-        return;
-    }
-    if (state.c === SPLIT) {
-        addState(list, state.next);
-        addState(list, state.next2);
-    } else {
-        list.push(state);
-    }
-}
-
-function re(regexp, str) {
-    let state = post2nfa(regexp);
-    return match(state, str);
-}
-
-Array.prototype.peek = function () {
-    if (!this.length) {
-        return null;
-    } else {
-        return this[this.length - 1];
-    }
 }
 
 function in2post(str) {
@@ -186,4 +148,9 @@ function getPrecedence(oper) {
     }
 }
 
-console.log(re('abb.+.a.', 'abba'));
+function regex2nfa(regex) {
+    let postRegex = in2post(regex);
+    return post2nfa(postRegex);
+}
+
+module.exports = { State, regex2nfa, SPLIT, MATCH };
