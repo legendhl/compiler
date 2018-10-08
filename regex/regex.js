@@ -39,6 +39,3 @@ function re(regex, str) {
 }
 
 module.exports = { re };
-
-console.log(re('abb+a', 'abba'));
-console.log(re('abbba', 'abba'));

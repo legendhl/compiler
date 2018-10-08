@@ -1,0 +1,25 @@
+{
+  "name": "compiler",
+  "version": "1.0.0",
+  "description": "compiler",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/legendhl/compiler.git"
+  },
+  "author": "legendhl",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/legendhl/compiler/issues"
+  },
+  "homepage": "https://github.com/legendhl/compiler#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "mocha": "^5.2.0",
+    "mochawesome": "^3.0.3"
+  }
+}
