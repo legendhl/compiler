@@ -34,4 +34,15 @@ describe('regex的测试', function () {
         expect(re('ab|cd', 'cd')).to.be.ok;
         expect(re('abc|de', 'abcde')).to.not.be.ok;
     });
+    it('()的测试', function () {
+        expect(re('(a)', 'a')).to.be.ok;
+        expect(re('(abc)', 'abc')).to.be.ok;
+        expect(re('(ab)+', 'ababab')).to.be.ok;
+        expect(re('a(b|c)d', 'abd')).to.be.ok;
+        expect(re('a(b|c)d', 'abc')).to.not.be.ok;
+        expect(re('a(bc)?d', 'ad')).to.be.ok;
+        expect(re('a(bc)?d', 'abcd')).to.be.ok;
+        expect(re('a(bc)?d', 'abcbcd')).to.not.be.ok;
+        expect(re('a(bc)*d', 'abcad')).to.not.be.ok;
+    });
 });
