@@ -27,4 +27,11 @@ describe('regex的测试', function () {
         expect(re('a.b', 'acb')).to.be.ok;
         expect(re('a.a', 'aab')).to.not.be.ok;
     });
+    it('|的测试', function () {
+        expect(re('a|b', 'a')).to.be.ok;
+        expect(re('a|b', 'b')).to.be.ok;
+        expect(re('ab|cd', 'ab')).to.be.ok;
+        expect(re('ab|cd', 'cd')).to.be.ok;
+        expect(re('abc|de', 'abcde')).to.not.be.ok;
+    });
 });
