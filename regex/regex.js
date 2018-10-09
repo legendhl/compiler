@@ -15,7 +15,7 @@ function match(state, str) {
 function step(curList, c, nextList) {
     nextList.splice(0, nextList.length);
     curList.forEach(state => {
-        if (state.c === c) {
+        if (state.c === c || state.c === '.') {
             addState(nextList, state.next);
         }
     });

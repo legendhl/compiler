@@ -1,5 +1,6 @@
 const SPLIT = Symbol('split');
 const MATCH = Symbol('match');
+const CATENATION = Symbol('Catenation');
 
 Array.prototype.peek = function () {
     if (!this.length) {
@@ -28,12 +29,12 @@ class State {
     }
 }
 
-function post2nfa(str) {
+function post2nfa(postRegex) {
     let stack = [];
     const matchState = new State(MATCH);
     let state, s1, s2, s;
-    for (let c of str) {
-        if (c === '.') { // Catenation
+    for (let c of postRegex) {
+        if (c === CATENATION) { // Catenation
             s2 = stack.pop();
             s1 = stack.pop();
             s1.patch(s2);
@@ -79,13 +80,13 @@ function in2post(str) {
         let s = str[i];
         if (!isOper(s)) {
             if (i > 0 && str[i - 1] !== '(' && str[i - 1] !== '|') {
-                pushOper('.', operStack, stack);
+                pushOper(CATENATION, operStack, stack);
             }
             stack.push(s);
         } else if (s === '(' || s === ')') {
             if (s === '(') {
                 if (stack.length) {
-                    pushOper('.', operStack, stack);
+                    pushOper(CATENATION, operStack, stack);
                 }
                 operStack.push(s);
             } else {
@@ -111,11 +112,11 @@ function in2post(str) {
     while (operStack.length) {
         stack.push(operStack.pop());
     }
-    return stack.join('');
+    return stack;
 }
 
 function isOper(ch) {
-    return '()\\[]*+?{}^$|.'.includes(ch);
+    return '()\\[]*+?{}^$|'.includes(ch) || ch === CATENATION;
 }
 
 function getPrecedence(oper) {
@@ -139,7 +140,7 @@ function getPrecedence(oper) {
             return 3;
         case '^':
         case '$':
-        case '.':
+        case CATENATION:
             return 2;
         case '|':
             return 1;
