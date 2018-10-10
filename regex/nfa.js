@@ -11,14 +11,14 @@ Array.prototype.peek = function () {
 }
 
 class State {
-    constructor(c, next = null, next2 = null, endList = []) {
+    constructor(c, next = null, next2 = null) {
         this.c = c; // character
         this.next = next; // a State
         this.next2 = next2; // another State
         this.endList = [this]; // end state list
     }
 
-    patch(state) {
+    connect(state) {
         for (let s of this.endList) {
             if (!s.next) {
                 s.next = state;
@@ -29,15 +29,16 @@ class State {
     }
 }
 
+const MATCHSTATE = new State(MATCH);
+
 function post2nfa(postRegex) {
     let stack = [];
-    const matchState = new State(MATCH);
     let state, s1, s2, s;
     for (let c of postRegex) {
         if (c === CATENATION) { // Catenation
             s2 = stack.pop();
             s1 = stack.pop();
-            s1.patch(s2);
+            s1.connect(s2);
             s1.endList = s2.endList;
             stack.push(s1);
         } else if (c === '|') { // Alternation
@@ -54,12 +55,12 @@ function post2nfa(postRegex) {
         } else if (c === '*') { // Zero or more
             s = stack.pop();
             state = new State(SPLIT, s);
-            s.patch(state);
+            s.connect(state);
             stack.push(state);
         } else if (c === '+') { // One or more
             s = stack.pop();
             state = new State(SPLIT, s);
-            s.patch(state);
+            s.connect(state);
             s.endList = [state];
             stack.push(s);
         } else { // default
@@ -69,7 +70,7 @@ function post2nfa(postRegex) {
     }
 
     state = stack.pop();
-    state.patch(matchState);
+    state.connect(MATCHSTATE);
     return state;
 }
 
@@ -79,7 +80,7 @@ function in2post(str) {
     for (let i = 0; i < str.length; i++) {
         let s = str[i];
         if (!isOper(s)) {
-            if (i > 0 && str[i - 1] !== '(' && str[i - 1] !== '|') {
+            if (i > 0 && str[i - 1] !== '(' && str[i - 1] !== '|') { // 字符之间添加连接符
                 pushOper(CATENATION, operStack, stack);
             }
             stack.push(s);
