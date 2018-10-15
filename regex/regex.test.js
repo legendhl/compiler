@@ -40,6 +40,8 @@ describe('regex的测试', function () {
         expect(re('(ab)+', 'ababab')).to.be.ok;
         expect(re('a(b|c)d', 'abd')).to.be.ok;
         expect(re('a(b|c)d', 'abc')).to.not.be.ok;
+        expect(re('a(b+c)d', 'abbbbcd')).to.be.ok;
+        expect(re('a(b+c*)d', 'abbbbccd')).to.be.ok;
         expect(re('a(bc)?d', 'ad')).to.be.ok;
         expect(re('a(bc)?d', 'abcd')).to.be.ok;
         expect(re('a(bc)?d', 'abcbcd')).to.not.be.ok;
