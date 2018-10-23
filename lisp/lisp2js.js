@@ -4,7 +4,30 @@
  *   (add 2 (subtract 4 2))   =>   [{ type: 'paren', value: '(' }, ...]
  */
 function tokenizer(input) {
-
+    let tokens = [];
+    for (let i = 0; i < input.length; i++) {
+        let ch = input[i];
+        if (/\s/.test(ch)) {
+            continue;
+        } else if (ch === '(' || ch === ')') {
+            tokens.push({ type: 'paren', value: ch });
+        } else if (/\d/.test(ch)) {
+            let numStr = '';
+            while (/\d/.test(ch)) {
+                numStr += ch;
+                ch = input[++i];
+            }
+            tokens.push({ type: 'number', value: parseInt(numStr) });
+        } else {
+            let str = '';
+            while (/\w/.test(ch)) {
+                str += ch;
+                ch = input[++i];
+            }
+            tokens.push({ type: 'name', value: str });
+        }
+    }
+    return tokens;
 }
 
 /**
@@ -27,10 +50,10 @@ function codeGenerator(ast) {
 }
 
 function compiler(input) {
-    var tokens = tokenizer(input);
-    var ast = parser(tokens);
-    var newAst = transformer(ast);
-    var output = codeGenerator(newAst);
+    let tokens = tokenizer(input);
+    let ast = parser(tokens);
+    let newAst = transformer(ast);
+    let output = codeGenerator(newAst);
 
     return output;
 }
