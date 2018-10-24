@@ -32,7 +32,7 @@ function tokenizer(input) {
     return tokens;
 }
 
-let input = '(add 20 (subtract 40 20))';
+let input = '(add 20 (subtract 40 30))';
 let tokens = tokenizer(input);
 console.log(tokens);
 /**
@@ -41,8 +41,45 @@ console.log(tokens);
  *   [{ type: 'paren', value: '(' }, ...]   =>   { type: 'Program', body: [...] }
  */
 function parser(tokens) {
+    let cur = 0;
+    let ast = {
+        type: 'Program',
+        body: []
+    };
+    ast.body.push(walk());
+    return ast;
 
+    function walk() {
+        let token = tokens[cur++];
+        if (token.type === 'name') {
+            let node = {
+                type: 'CallExpression',
+                name: token.value,
+                params: []
+            };
+            let param;
+            while ((param = walk()) !== null) {
+                node.params.push(param);
+            }
+            return node;
+        }
+        if (token.type === 'paren' && token.value === '(') {
+            return walk();
+        }
+        if (token.type === 'paren' && token.value === ')') {
+            return null;
+        }
+        if (token.type === 'number') {
+            return {
+                type: 'NumberLiteral',
+                value: token.value
+            };
+        }
+        throw new Error(`Unexpected token ${token}`)
+    }
 }
+let ast = parser(tokens);
+console.log(JSON.stringify(ast));
 
 // 转换器，将原AST转为新AST
 function transformer(ast) {
