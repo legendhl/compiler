@@ -5,31 +5,36 @@
  */
 function tokenizer(input) {
     let tokens = [];
-    for (let i = 0; i < input.length; i++) {
+    for (let i = 0; i < input.length;) {
         let ch = input[i];
         if (/\s/.test(ch)) {
+            i++;
             continue;
         } else if (ch === '(' || ch === ')') {
+            i++;
             tokens.push({ type: 'paren', value: ch });
         } else if (/\d/.test(ch)) {
             let numStr = '';
-            while (/\d/.test(ch)) {
+            do {
                 numStr += ch;
-                ch = input[++i];
-            }
+            } while (/\d/.test(ch = input[++i]));
             tokens.push({ type: 'number', value: parseInt(numStr) });
-        } else {
+        } else if (/\w/.test(ch)) {
             let str = '';
-            while (/\w/.test(ch)) {
+            do {
                 str += ch;
-                ch = input[++i];
-            }
+            } while (/\w/.test(ch = input[++i]));
             tokens.push({ type: 'name', value: str });
+        } else {
+            throw new Error(`Unexpected char ${ch} at ${i}`)
         }
     }
     return tokens;
 }
 
+let input = '(add 20 (subtract 40 20))';
+let tokens = tokenizer(input);
+console.log(tokens);
 /**
  *  语法分析器接受 token 数组，然后转化为 AST
  *
