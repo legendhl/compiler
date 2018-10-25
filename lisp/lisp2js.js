@@ -32,9 +32,6 @@ function tokenizer(input) {
     return tokens;
 }
 
-let input = '(add 20 (subtract 40 30))';
-let tokens = tokenizer(input);
-console.log(tokens);
 /**
  *  语法分析器接受 token 数组，然后转化为 AST
  *
@@ -78,8 +75,6 @@ function parser(tokens) {
         throw new Error(`Unexpected token ${token.type}`)
     }
 }
-let ast = parser(tokens);
-console.log(JSON.stringify(ast));
 
 // 转换器，将原AST转为新AST
 function transformer(ast) {
@@ -118,13 +113,42 @@ function transformer(ast) {
     }
 }
 
-let jsAst = transformer(ast);
-console.log(JSON.stringify(jsAst));
-
 // 根据AST生成代码
 function codeGenerator(ast) {
-
+    let code = '';
+    if (ast.type === 'Program') {
+        for (let node of ast.body) {
+            code += `${codeGenerator(node)}`;
+        }
+        return code;
+    }
+    if (ast.type === 'ExpressionStatement') {
+        return `${codeGenerator(ast.expression)};\n`;
+    }
+    if (ast.type === 'CallExpression') {
+        code = `${codeGenerator(ast.callee)}(`;
+        code += ast.arguments.map(argument => codeGenerator(argument)).join(', ');
+        code += ')';
+        return code;
+    }
+    if (ast.type === 'Identifier') {
+        return ast.name;
+    }
+    if (ast.type === 'Literal') {
+        return ast.value;
+    }
+    throw new Error(`Unexpected ast node ${ast.type}`)
 }
+
+let input = '(add 20 (subtract 40 30))';
+let tokens = tokenizer(input);
+console.log(tokens);
+let ast = parser(tokens);
+console.log(JSON.stringify(ast));
+let jsAst = transformer(ast);
+console.log(JSON.stringify(jsAst));
+let jsCode = codeGenerator(jsAst);
+console.log(jsCode);
 
 function compiler(input) {
     let tokens = tokenizer(input);
