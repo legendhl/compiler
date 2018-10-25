@@ -75,7 +75,7 @@ function parser(tokens) {
                 value: token.value
             };
         }
-        throw new Error(`Unexpected token ${token}`)
+        throw new Error(`Unexpected token ${token.type}`)
     }
 }
 let ast = parser(tokens);
@@ -83,8 +83,43 @@ console.log(JSON.stringify(ast));
 
 // 转换器，将原AST转为新AST
 function transformer(ast) {
+    let newAst = {
+        type: 'Program',
+        body: []
+    };
+    for (let i = 0; i < ast.body.length; i++) {
+        let node = ast.body[i];
+        let newNode = { type: 'ExpressionStatement', expression: traverse(node) };
+        newAst.body.push(newNode);
+    }
+    return newAst;
 
+    function traverse(node) {
+        if (node.type === 'CallExpression') {
+            let newNode = {};
+            newNode.type = 'CallExpression';
+            newNode.callee = {
+                type: 'Identifier',
+                name: node.name
+            };
+            newNode.arguments = [];
+            for (let param of node.params) {
+                newNode.arguments.push(traverse(param));
+            }
+            return newNode;
+        }
+        if (node.type === 'NumberLiteral') {
+            return {
+                type: 'Literal',
+                value: node.value
+            }
+        }
+        throw new Error(`Unexpected ast node ${node.type}`)
+    }
 }
+
+let jsAst = transformer(ast);
+console.log(JSON.stringify(jsAst));
 
 // 根据AST生成代码
 function codeGenerator(ast) {
